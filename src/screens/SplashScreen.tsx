@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useRef } from 'react';
 import { 
   View, 
@@ -6,6 +7,9 @@ import {
   Animated, 
   Dimensions 
 } from 'react-native';
+import { NativeModules } from 'react-native';
+
+console.log('CallRecorder module:', NativeModules.CallRecorder);
 
 const { width, height } = Dimensions.get('window');
 
@@ -17,6 +21,21 @@ const SplashScreen = ({ navigation }: any) => {
   const ringOpacity = useRef(new Animated.Value(0)).current;
   const progressWidth = useRef(new Animated.Value(0)).current;
 
+  
+  useEffect(() => {
+    const checkPermissionFlow = async () => {
+      const done = await AsyncStorage.getItem('PERMISSIONS_COMPLETED');
+      console.log('SPLASH READ 👉', done);
+
+      if (done === 'true') {
+        navigation.replace('MainTabs');
+      } else {
+        navigation.replace('Permissions');
+      }
+    };
+
+    checkPermissionFlow();
+  }, []);
   useEffect(() => {
     // Animation sequence
     Animated.parallel([

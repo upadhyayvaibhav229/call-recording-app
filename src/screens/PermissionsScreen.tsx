@@ -4,10 +4,14 @@ import {
   Text, 
   StyleSheet, 
   ScrollView,
-  SafeAreaView 
+  SafeAreaView, 
+  Linking,
+  Alert
 } from 'react-native';
 import Header from '../components/Header';
 import PrimaryButton from '../components/PrimaryButton';
+import { requestAllPermissions } from '../utils/permission';
+import { setPermissionsCompleted } from '../utils/storage';
 
 const PermissionsScreen = ({ navigation }: any) => {
   const permissions = [
@@ -36,6 +40,25 @@ const PermissionsScreen = ({ navigation }: any) => {
       required: false,
     },
   ];
+
+const handleGrantPermissions = async () => {
+  const granted = await requestAllPermissions();
+
+  if (granted) {
+    await setPermissionsCompleted();
+    navigation.replace('MainTabs');
+  } else {
+    Alert.alert(
+      'Permissions Required',
+      'Some permissions were denied. You can enable them manually from Settings.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Open Settings', onPress: () => Linking.openSettings() },
+      ]
+    );
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -107,18 +130,12 @@ const PermissionsScreen = ({ navigation }: any) => {
           <View style={styles.actionsContainer}>
             <PrimaryButton
               label="Grant All Permissions"
-              onPress={() => navigation.replace('MainTabs')}
+              onPress={handleGrantPermissions}
               variant="primary"
               size="large"
               fullWidth
             />
-            
-            <PrimaryButton
-              label="Continue with Limited Access"
-              onPress={() => navigation.replace('MainTabs')}
-              variant="outline"
-              fullWidth
-            />
+        
           </View>
 
           {/* Terms */}
